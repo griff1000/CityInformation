@@ -110,27 +110,38 @@
 
         // POST: api/Cities
         [HttpPost]
-        public async Task<ActionResult<City>> PostCity([FromBody] CityToAdd city)
+        public async Task<ActionResult<City>> CreateCity([FromBody] CityToAdd city)
         {
-            var dbCity = Mapper.Map<City>(city);
+            if (city == null)
+            {
+                return BadRequest("No City data supplied");
+            }
+            var dbCity = _mapper.Map<City>(city);
             await _cityRepository.CreateCityAsync(dbCity);
+
             var result = await _cityRepository.SaveAsync();
 
-            if (result) return CreatedAtAction("GetCities", new {cityName = city.Name}, city);
+            var dtoCity = _mapper.Map<CityInformation>(dbCity);
+            //TODO: This isn't a fully populated CityInformation object - it won't have country or weather information
+            if (result) return CreatedAtAction("GetCities", new {cityName = city.Name}, dtoCity);
+
             throw new ApplicationException("Failed to create new city");
         }
 
         // DELETE: api/Cities/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<City>> DeleteCity(int id)
+        public async Task<ActionResult<City>> DeleteCity(Guid id)
         {
-            var city = await _context.Cities.FindAsync(id);
-            if (city == null) return NotFound();
+            if (id == Guid.Empty) return BadRequest("No valid CityId supplied");
+            var dbCity = await _cityRepository.GetCityAsync(id);
+            if (dbCity == null) return NotFound();
 
-            _context.Cities.Remove(city);
-            await _context.SaveChangesAsync();
+            _cityRepository.DeleteCity(dbCity);
+            var result = await _cityRepository.SaveAsync();
 
-            return city;
+            if (result) return NoContent();
+
+            throw new ArgumentException("Failed to delete city");
         }
 
         private bool CityExists(Guid id)

@@ -14,7 +14,7 @@
         [Range(1, 5)]
         public int TouristRating { get; set; }
 
-        public DateTimeOffset DateEstablished { get; set; }
+        public DateTime DateEstablished { get; set; }
 
         [Required]
         public string CountryName { get; set; }

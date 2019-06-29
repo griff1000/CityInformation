@@ -21,9 +21,9 @@
             await _context.Cities.AddAsync(city);
         }
 
-        public void DeleteCity(int cityId)
+        public void DeleteCity(City cityToDelete)
         {
-            throw new NotImplementedException();
+            _context.Cities.Remove(cityToDelete);
         }
 
         public IQueryable<City> GetCities(string cityName)
@@ -35,6 +35,11 @@
             }
 
             return response;
+        }
+
+        public Task<City> GetCityAsync(Guid cityId)
+        {
+            return _context.Cities.FindAsync(cityId);
         }
 
         public async Task<bool> SaveAsync()
