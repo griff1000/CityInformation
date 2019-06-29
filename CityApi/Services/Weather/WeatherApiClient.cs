@@ -8,6 +8,9 @@
     using Newtonsoft.Json;
     using Options;
 
+    /// <summary>
+    /// Handles interaction with the OpenWeather API
+    /// </summary>
     public class WeatherApiClient : IWeatherApiClient
     {
         private readonly HttpClient _client;
@@ -18,6 +21,13 @@
             _client = client ?? throw new ArgumentNullException(nameof(client));
             _appSettings = appSettings ?? throw new ArgumentNullException(nameof(appSettings));
         }
+
+        /// <summary>
+        /// Gets the weather for the given city
+        /// </summary>
+        /// <param name="city">Either just the name of the city, or city name concatenated with country code e.g. "Cardiff" or "Cardiff,GB"</param>
+        /// <param name="appId">A valid OpenWeather API key</param>
+        /// <returns>Weather information for the first city that matches the given city name</returns>
         public async Task<Envelope> GetWeatherForCityAsync(string city, string appId)
         {
             if (string.IsNullOrEmpty(city)) throw new ArgumentNullException(nameof(city));
@@ -32,7 +42,7 @@
 
             if (response.IsSuccessStatusCode) return JsonConvert.DeserializeObject<Envelope>(responseContent);
 
-            throw new Exception($"Failed to call Weather API.  Status code: {response.StatusCode}");
+            throw new ApplicationException($"Failed to call Weather API.  Status code: {response.StatusCode}");
         }
     }
 }

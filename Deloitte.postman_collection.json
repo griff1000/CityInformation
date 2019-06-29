@@ -1,0 +1,212 @@
+{
+	"info": {
+		"_postman_id": "25d5acb2-c132-47b5-869e-4f301da5d3d5",
+		"name": "Deloitte",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get multiple cities starting with string",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:44314/api/cities/ca",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "44314",
+					"path": [
+						"api",
+						"cities",
+						"ca"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create City",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"New York\",\n\t\"state\": \"New York\",\n\t\"touristRating\": 5,\n\t\"dateEstablished\": \"1905-01-01T00:00:00\",\n\t\"countryName\": \"United States of America\"\n}"
+				},
+				"url": {
+					"raw": "https://localhost:44314/api/cities",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "44314",
+					"path": [
+						"api",
+						"cities"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete City",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "https://localhost:44314/api/cities/d27a00b1-04bd-4b0c-b1f0-3bffc1ab013c",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "44314",
+					"path": [
+						"api",
+						"cities",
+						"d27a00b1-04bd-4b0c-b1f0-3bffc1ab013c"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update City (with extra fields)",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"New York\",\n\t\"state\": \"New York\",\n\t\"touristRating\": 1,\n\t\"dateEstablished\": \"1950-01-01T00:00:00\",\n\t\"countryName\": \"United States of America\"\n}"
+				},
+				"url": {
+					"raw": "https://localhost:44314/api/cities/9cc68ce1-4932-4c86-88e3-d6edd4dcebda",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "44314",
+					"path": [
+						"api",
+						"cities",
+						"9cc68ce1-4932-4c86-88e3-d6edd4dcebda"
+					]
+				},
+				"description": "This update deliberately has more fields than should be updatable to demonstrate that they will be ignored - only the touristRating and dateEstablished should be updateable, the name, state and countryName will be ignored"
+			},
+			"response": []
+		},
+		{
+			"name": "Get all cities",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:44314/api/cities",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "44314",
+					"path": [
+						"api",
+						"cities"
+					]
+				},
+				"description": "Gets all the cities"
+			},
+			"response": []
+		},
+		{
+			"name": "OData query",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:44314/api/cities/ca?$Select=Name,TouristRating&$OrderBy=Name&$Filter=Name%20eq%20%27Cardiff%27",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "44314",
+					"path": [
+						"api",
+						"cities",
+						"ca"
+					],
+					"query": [
+						{
+							"key": "$Select",
+							"value": "Name,TouristRating"
+						},
+						{
+							"key": "$OrderBy",
+							"value": "Name"
+						},
+						{
+							"key": "$Filter",
+							"value": "Name%20eq%20%27Cardiff%27"
+						}
+					]
+				},
+				"description": "Uses the following OData capabilities:\n$Select to shape the returning data\n$Filter to limit the records returned\n$OrderBy to order the returned records"
+			},
+			"response": []
+		},
+		{
+			"name": "Update City ",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"touristRating\": 1,\n\t\"dateEstablished\": \"1950-01-01T00:00:00\"\n}"
+				},
+				"url": {
+					"raw": "https://localhost:44314/api/cities/9cc68ce1-4932-4c86-88e3-d6edd4dcebda",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "44314",
+					"path": [
+						"api",
+						"cities",
+						"9cc68ce1-4932-4c86-88e3-d6edd4dcebda"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

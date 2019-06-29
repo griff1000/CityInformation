@@ -17,6 +17,9 @@
     using Services.Countries;
     using Services.Weather;
 
+    /// <summary>
+    /// The City API Controller
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class CitiesController : ControllerBase
@@ -37,22 +40,29 @@
             _cityRepository = cityRepository ?? throw new ArgumentNullException(nameof(cityRepository));
         }
 
+        /// <summary>
+        /// Gets all the cities in the database, combines them with country and weather information and returns them to the caller.
+        /// </summary>
         // GET: api/Cities
         [HttpGet]
         [EnableQuery]
-        public ActionResult<IEnumerable<CityInformation>> GetAllCities()
+        public IActionResult GetAllCities()
         {
             return RedirectToAction("GetCities", new {cityName = "*"});
         }
 
+        /// <summary>
+        /// Gets all the cities in the database that start with the given city name, combines them with country and weather information and returns them to the caller.
+        /// </summary>
+        /// <param name="cityName">The complete or first part of a city name, or the wildcard character "*"</param>
         // GET: api/Cities/Cardiff
         [HttpGet("{cityName}")]
         [EnableQuery]
-        public async Task<ActionResult<IEnumerable<CityInformation>>> GetCities(string cityName)
+        public async Task<IActionResult> GetCities(string cityName)
         {
             if (string.IsNullOrEmpty(cityName)) throw new ArgumentNullException(nameof(cityName));
 
-            var cities = await _cityRepository.GetCities(cityName).ToListAsync();
+            var cities = await _cityRepository.GetCitiesAsync(cityName);
             var response = new List<CityInformation>();
 
             foreach (var city in cities)
@@ -72,17 +82,23 @@
                     countryCode = $",{country.Alpha2Code}";
                 }
 
-                var weather = await _weatherApiClient.GetWeatherForCityAsync($"{cityInfo.Name}{countryCode}",
-                    _appSettings.CurrentValue.OpenweatherAppId);
+                var cityInfoString = cityInfo.Name + countryCode;
+
+                var weather = await _weatherApiClient.GetWeatherForCityAsync(cityInfoString, _appSettings.CurrentValue.OpenweatherAppId);
                 cityInfo.WeatherDescription = weather.Weather.FirstOrDefault()?.Description;
 
                 response.Add(cityInfo);
             }
 
-            return response;
+            return Ok(response);
         }
 
 
+        /// <summary>
+        /// Updates the given city
+        /// </summary>
+        /// <param name="id">The CityId value of the City to update</param>
+        /// <param name="cityToUpdate">The city to update</param>
         // PUT: api/Cities/5
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateCity(Guid id, [FromBody] CityToUpdate cityToUpdate)
@@ -106,9 +122,15 @@
             throw new ArgumentException("Unable to update a City");
         }
 
+        /// <summary>
+        /// Create a new city
+        /// </summary>
+        /// <param name="city">The city to create</param>
+        /// <returns>The city record including the newly generated CityId but without country or weather information.
+        /// Also includes a Location header in the response to allow the user to retrieve the full record.</returns>
         // POST: api/Cities
         [HttpPost]
-        public async Task<ActionResult<City>> CreateCity([FromBody] CityToAdd city)
+        public async Task<IActionResult> CreateCity([FromBody] CityToAdd city)
         {
             if (city == null) return BadRequest("No City data supplied");
 
@@ -126,9 +148,13 @@
             throw new ApplicationException("Failed to create new city");
         }
 
+        /// <summary>
+        /// Deletes the given city from the database
+        /// </summary>
+        /// <param name="id">The CityId of the city to delete</param>
         // DELETE: api/Cities/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<City>> DeleteCity(Guid id)
+        public async Task<IActionResult> DeleteCity(Guid id)
         {
             if (id == Guid.Empty) return BadRequest("No valid CityId supplied");
             var dbCity = await _cityRepository.GetCityAsync(id);
