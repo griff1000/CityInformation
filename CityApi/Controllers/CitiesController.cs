@@ -7,13 +7,11 @@
     using AutoMapper;
     using Data.DTO.Request;
     using Data.DTO.Response;
-    using Database;
     using Microsoft.AspNet.OData;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Options;
     using Models.Database;
-    using Newtonsoft.Json.Bson;
     using Options;
     using Persistence;
     using Services.Countries;
@@ -25,15 +23,13 @@
     {
         private readonly IOptionsMonitor<AppSettingsOptions> _appSettings;
         private readonly ICityRepository _cityRepository;
-        private readonly ApiContext _context;
         private readonly ICountryApiClient _countryApiClient;
         private readonly IMapper _mapper;
         private readonly IWeatherApiClient _weatherApiClient;
 
-        public CitiesController(ApiContext context, IOptionsMonitor<AppSettingsOptions> appSettings, IMapper mapper,
+        public CitiesController(IOptionsMonitor<AppSettingsOptions> appSettings, IMapper mapper,
             ICountryApiClient countryApiClient, IWeatherApiClient weatherApiClient, ICityRepository cityRepository)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
             _appSettings = appSettings ?? throw new ArgumentNullException(nameof(appSettings));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _countryApiClient = countryApiClient ?? throw new ArgumentNullException(nameof(countryApiClient));
@@ -89,10 +85,12 @@
 
         // PUT: api/Cities/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCity(Guid id, [FromBody]CityToUpdate cityToUpdate)
+        public async Task<IActionResult> UpdateCity(Guid id, [FromBody] CityToUpdate cityToUpdate)
         {
             if (id == Guid.Empty) return BadRequest("Invalid City Id");
             if (cityToUpdate == null) return BadRequest("No update information supplied");
+
+            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             var dbCity = await _cityRepository.GetCityAsync(id);
             if (dbCity == null) return NotFound();
@@ -112,10 +110,10 @@
         [HttpPost]
         public async Task<ActionResult<City>> CreateCity([FromBody] CityToAdd city)
         {
-            if (city == null)
-            {
-                return BadRequest("No City data supplied");
-            }
+            if (city == null) return BadRequest("No City data supplied");
+
+            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+
             var dbCity = _mapper.Map<City>(city);
             await _cityRepository.CreateCityAsync(dbCity);
 

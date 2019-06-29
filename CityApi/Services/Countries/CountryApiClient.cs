@@ -5,16 +5,20 @@
     using System.Net;
     using System.Net.Http;
     using System.Threading.Tasks;
+    using Microsoft.Extensions.Options;
     using Models.Services.Countries;
     using Newtonsoft.Json;
+    using Options;
 
     public class CountryApiClient : ICountryApiClient
     {
         private readonly HttpClient _client;
+        private readonly IOptionsMonitor<AppSettingsOptions> _appSettings;
 
-        public CountryApiClient(HttpClient client)
+        public CountryApiClient(HttpClient client, IOptionsMonitor<AppSettingsOptions> appSettings)
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
+            _appSettings = appSettings ?? throw new ArgumentNullException(nameof(appSettings));
         }
 
         public async Task<ICollection<Country>> GetCountriesAsync(string countryName)
@@ -24,7 +28,7 @@
             //TODO: Ideally I'd use something like WebUtility.UrlEncode here - but that doesn't return the expected encoding
             var encodedCountryName = countryName.Replace(" ", "%20");
 
-            var apiUrl = $"https://restcountries.eu/rest/v2/name/{encodedCountryName}";
+            var apiUrl = string.Format(_appSettings.CurrentValue.CountryApiUrl, encodedCountryName);
 
             var response = await _client.GetAsync(apiUrl);
             var responseContent = await response.Content.ReadAsStringAsync();
