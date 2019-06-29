@@ -8,12 +8,14 @@
     using Database;
     using Microsoft.AspNet.OData.Extensions;
     using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Diagnostics;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Logging;
     using Models.Database;
     using Options;
     using Persistence;
@@ -66,7 +68,7 @@
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             if (env.IsDevelopment())
             {
@@ -78,10 +80,16 @@
                 app.UseExceptionHandler(appBuilder =>
                 {
                     appBuilder.Run(async context =>
+                    {
+                        var exceptionHandlerFeature = context.Features.Get<IExceptionHandlerFeature>();
+                        if (exceptionHandlerFeature != null)
                         {
-                            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                            await context.Response.WriteAsync("An unexpected error occurred.  Try again later.")
-                        });
+                            var logger = loggerFactory.CreateLogger("Global error handler");
+                            logger.LogError(500, exception: exceptionHandlerFeature.Error, message:exceptionHandlerFeature.Error.Message);
+                        }
+                        context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                        await context.Response.WriteAsync("An unexpected error occurred.  Try again later.");
+                    });
                 });
             }
 

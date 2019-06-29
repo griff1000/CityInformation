@@ -23,11 +23,11 @@
     public class CitiesController : ControllerBase
     {
         private readonly IOptionsMonitor<AppSettingsOptions> _appSettings;
-        private readonly ApiContext _context;
-        private readonly IMapper _mapper;
-        private readonly ICountryApiClient _countryApiClient;
-        private readonly IWeatherApiClient _weatherApiClient;
         private readonly ICityRepository _cityRepository;
+        private readonly ApiContext _context;
+        private readonly ICountryApiClient _countryApiClient;
+        private readonly IMapper _mapper;
+        private readonly IWeatherApiClient _weatherApiClient;
 
         public CitiesController(ApiContext context, IOptionsMonitor<AppSettingsOptions> appSettings, IMapper mapper,
             ICountryApiClient countryApiClient, IWeatherApiClient weatherApiClient, ICityRepository cityRepository)
@@ -57,7 +57,7 @@
 
             var cities = await _cityRepository.GetCities(cityName).ToListAsync();
             var response = new List<CityInformation>();
-            
+
             foreach (var city in cities)
             {
                 var cityInfo = _mapper.Map<CityInformation>(city);
@@ -74,6 +74,7 @@
 
                     countryCode = $",{country.Alpha2Code}";
                 }
+
                 var weather = await _weatherApiClient.GetWeatherForCityAsync($"{cityInfo.Name}{countryCode}",
                     _appSettings.CurrentValue.OpenweatherAppId);
                 cityInfo.WeatherDescription = weather.Weather.FirstOrDefault()?.Description;
@@ -84,7 +85,7 @@
             return response;
         }
 
-        
+
         // PUT: api/Cities/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCity(Guid cityId, City city)
@@ -109,18 +110,14 @@
 
         // POST: api/Cities
         [HttpPost]
-        public async Task<ActionResult<City>> PostCity(CityToAdd city)
+        public async Task<ActionResult<City>> PostCity([FromBody] CityToAdd city)
         {
             var dbCity = Mapper.Map<City>(city);
             await _cityRepository.CreateCityAsync(dbCity);
             var result = await _cityRepository.SaveAsync();
 
-            if (result)
-            {
-                return CreatedAtAction("GetCities", new {cityName = city.Name}, city);
-            }
+            if (result) return CreatedAtAction("GetCities", new {cityName = city.Name}, city);
             throw new ApplicationException("Failed to create new city");
-
         }
 
         // DELETE: api/Cities/5

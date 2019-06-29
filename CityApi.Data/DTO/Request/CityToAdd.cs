@@ -5,12 +5,18 @@
 
     public class CityToAdd
     {
-        [Required] public string Name { get; set; }
+        [Required]
+        public string Name { get; set; }
 
         public string State { get; set; }
-        public TouristRating TouristRating { get; set; }
-        public DateTime DateEstablished { get; set; }
 
-        [Required] public string CountryName { get; set; }
+        [EnumDataType(typeof(TouristRating))]
+        [Range(1, 5)]
+        public int TouristRating { get; set; }
+
+        public DateTimeOffset DateEstablished { get; set; }
+
+        [Required]
+        public string CountryName { get; set; }
     }
 }
