@@ -13,6 +13,7 @@
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Options;
     using Models.Database;
+    using Newtonsoft.Json.Bson;
     using Options;
     using Persistence;
     using Services.Countries;
@@ -88,24 +89,23 @@
 
         // PUT: api/Cities/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCity(Guid cityId, City city)
+        public async Task<IActionResult> UpdateCity(Guid id, [FromBody]CityToUpdate cityToUpdate)
         {
-            if (cityId != city.CityId) return BadRequest();
+            if (id == Guid.Empty) return BadRequest("Invalid City Id");
+            if (cityToUpdate == null) return BadRequest("No update information supplied");
 
-            _context.Entry(city).State = EntityState.Modified;
+            var dbCity = await _cityRepository.GetCityAsync(id);
+            if (dbCity == null) return NotFound();
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CityExists(cityId))
-                    return NotFound();
-                throw;
-            }
+            _mapper.Map(cityToUpdate, dbCity);
 
-            return NoContent();
+            _cityRepository.UpdateCity(dbCity);
+
+            var result = await _cityRepository.SaveAsync();
+
+            if (result) return NoContent();
+
+            throw new ArgumentException("Unable to update a City");
         }
 
         // POST: api/Cities
@@ -142,11 +142,6 @@
             if (result) return NoContent();
 
             throw new ArgumentException("Failed to delete city");
-        }
-
-        private bool CityExists(Guid id)
-        {
-            return _context.Cities.Any(e => e.CityId == id);
         }
     }
 }

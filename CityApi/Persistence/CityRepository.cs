@@ -50,7 +50,7 @@
 
         public void UpdateCity(City city)
         {
-            throw new NotImplementedException();
+            return;
         }
     }
 }

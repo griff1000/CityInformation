@@ -11,6 +11,7 @@
         {
             CreateMap<City, CityInformation>();
             CreateMap<CityToAdd, City>();
+            CreateMap<CityToUpdate, City>();
         }
     }
 }
