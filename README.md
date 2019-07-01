@@ -11,7 +11,7 @@ Once you have met the prerequisites, open a command prompt in the CityApi projec
 dotnet ef database update
 ```
 ## Openweather API
-The Openweather API requires the user to register (for free) and then to create an API Id - go to https://openweathermap.org to do this.  The user of this application will need to do this and then copy the API Key into the CityInformation/CityApi/appsettings.json file to replace the placeholder for the key OpenweatherAppId
+The Openweather API requires the user to register (for free) and then to create an API Id - go to https://openweathermap.org to do this.  The user of this application will need to do this and then copy the API Key into the CityInformation/CityApi/appsettings.json file to replace the placeholder for the key OpenweatherAppId. NB. It can take several hours for Openweather to activate a new API key.  If at first you don't succeed, try try again (a few hours later)
 
 ## Architecture
 The application is a pretty standard RESTful WebAPI.  The data transfer objects that can be shared with users have been implemented in a separate assembly - CityApi.Data.  All internal data definitions and service references are in the CityApi project.  As the application grows or as the need to share functionality emerges it might make sense to refactor some of these things out to their own assemblies, for enforcement of responsibility boundaries or for sharing functionality.
