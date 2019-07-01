@@ -10,6 +10,8 @@ Once you have met the prerequisites, open a command prompt in the CityApi projec
 ```
 dotnet ef database update
 ```
+## Openweather API
+The Openweather API requires the user to register (for free) and then to create an API Id - go to https://openweathermap.org to do this.  The user of this application will need to do this and then copy the API Key into the CityInformation/CityApi/appsettings.json file to replace the placeholder for the key OpenweatherAppId
 
 ## Architecture
 The application is a pretty standard RESTful WebAPI.  The data transfer objects that can be shared with users have been implemented in a separate assembly - CityApi.Data.  All internal data definitions and service references are in the CityApi project.  As the application grows or as the need to share functionality emerges it might make sense to refactor some of these things out to their own assemblies, for enforcement of responsibility boundaries or for sharing functionality.
@@ -37,6 +39,9 @@ The estimated population figure is supposed to be stored in the database; howeve
 All other requirements should have been met.  You can perform full CRUD operations on cities in the database, and when querying cities you will receive combined database and web service (country and weather) information for each city in the database - where that information can be found.
 
 # Other information
+## Accept header
+The application respects the Accept header and can process application/json and application/xml
+
 ## OData
 The application supports OData queries - data shaping, ordering and filtering (but not expansion - there's nowhere to expand to!).  As an example:
 https://localhost:44314/api/cities/ca?$Select=Name,TouristRating&$OrderBy=Name&$Filter=Name%20eq%20%27Cardiff%27
