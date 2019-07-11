@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "25d5acb2-c132-47b5-869e-4f301da5d3d5",
-		"name": "Deloitte",
+		"name": "RESTful API Test",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
