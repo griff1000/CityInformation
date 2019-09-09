@@ -12,6 +12,7 @@
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.Formatters;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
@@ -42,7 +43,15 @@
             });
             services.AddSingleton(mappingConfig.CreateMapper());
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddMvc(options =>
+                {
+                    // Ensure only valid Accept header values (application/json and application/xml) are allowed
+                    options.ReturnHttpNotAcceptable = true;
+                    // Allow the use of XML in Accept and Content-Type headers
+                    options.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter());
+                    options.InputFormatters.Add(new XmlDataContractSerializerInputFormatter(options));
+                    })
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             services.AddHttpClient<IWeatherApiClient, WeatherApiClient>().SetHandlerLifetime(TimeSpan.FromMinutes(5))
                 .AddPolicyHandler(GetRetryPolicy());
@@ -54,6 +63,7 @@
                 o.UseSqlServer(Configuration.GetConnectionString("ApiContext"));
             });
             services.AddScoped<ICityRepository, CityRepository>();
+            // Enable OData
             services.AddOData();
 
             services.Configure<AppSettingsOptions>(Configuration.GetSection("AppSettings"));
@@ -61,6 +71,7 @@
 
         private IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
         {
+            // Configure a Poly retry policy for calls to 3rd party services enabling exponential backoff over 3 retries
             return HttpPolicyExtensions
                     .HandleTransientHttpError()
                     .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.NotFound)
@@ -72,6 +83,7 @@
         {
             if (env.IsDevelopment())
             {
+                // Show all errors to developers including sensitive information
                 app.UseDeveloperExceptionPage();
             }
             else
@@ -84,9 +96,11 @@
                         var exceptionHandlerFeature = context.Features.Get<IExceptionHandlerFeature>();
                         if (exceptionHandlerFeature != null)
                         {
+                            // Log all unhandled exceptions
                             var logger = loggerFactory.CreateLogger("Global error handler");
                             logger.LogError(500, exception: exceptionHandlerFeature.Error, message:exceptionHandlerFeature.Error.Message);
                         }
+                        // Return 500 internal server error with a public-safe message for all unhandled exceptions
                         context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                         await context.Response.WriteAsync("An unexpected error occurred.  Try again later.");
                     });
@@ -97,6 +111,7 @@
             app.UseMvc(routeBuilder =>
             {
                 routeBuilder.EnableDependencyInjection();
+                // Enable specific OData actions
                 routeBuilder.Select().Count().OrderBy().Filter();
             });
 

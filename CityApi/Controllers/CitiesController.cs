@@ -90,6 +90,7 @@
                 response.Add(cityInfo);
             }
 
+            // Return 200 with the list of data to return
             return Ok(response);
         }
 
@@ -106,6 +107,7 @@
             if (id == Guid.Empty) return BadRequest("Invalid City Id");
             if (cityToUpdate == null) return BadRequest("No update information supplied");
 
+            // Return 422 Unprocessable Entity (you could argue for a 400 instead)
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             var dbCity = await _cityRepository.GetCityAsync(id);
@@ -117,6 +119,7 @@
 
             var result = await _cityRepository.SaveAsync();
 
+            // Return a 204
             if (result) return NoContent();
 
             throw new ArgumentException("Unable to update a City");
@@ -134,6 +137,7 @@
         {
             if (city == null) return BadRequest("No City data supplied");
 
+            // Return 422 Unprocessable Entity (you could argue for a 400 instead)
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             var dbCity = _mapper.Map<City>(city);
@@ -143,6 +147,7 @@
 
             var dtoCity = _mapper.Map<CityInformation>(dbCity);
             //TODO: This isn't a fully populated CityInformation object - it won't have country or weather information
+            // Return 201 with a Location header to allow the city to be retrieved
             if (result) return CreatedAtAction("GetCities", new {cityName = city.Name}, dtoCity);
 
             throw new ApplicationException("Failed to create new city");
@@ -156,13 +161,16 @@
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCity(Guid id)
         {
+            // Return 400 Bad Request
             if (id == Guid.Empty) return BadRequest("No valid CityId supplied");
             var dbCity = await _cityRepository.GetCityAsync(id);
+            // Return 404 Not Found
             if (dbCity == null) return NotFound();
 
             _cityRepository.DeleteCity(dbCity);
             var result = await _cityRepository.SaveAsync();
 
+            // Return a 204
             if (result) return NoContent();
 
             throw new ArgumentException("Failed to delete city");

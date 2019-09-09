@@ -9,7 +9,7 @@
     using Models.Database;
 
     /// <summary>
-    /// Handles all persistence-related data activies i.e. storing and retrieving data
+    /// Handles all persistence-related data activities i.e. storing and retrieving data
     /// </summary>
     public class CityRepository : ICityRepository
     {

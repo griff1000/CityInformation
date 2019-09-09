@@ -7,6 +7,7 @@
 
     public class MappingProfile : Profile
     {
+        // Define all the AutoMapper mappings
         public MappingProfile()
         {
             CreateMap<City, CityInformation>();
